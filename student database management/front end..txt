@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Database System</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { margin: 5px; }
+  </style>
+</head>
+<body>
+
+  <h2>Student Database Management</h2>
+
+  <input type="text" id="name" placeholder="Name">
+  <input type="number" id="age" placeholder="Age">
+  <input type="text" id="course" placeholder="Course">
+  <button onclick="addStudent()">Add Student</button>
+
+  <h3>Student List</h3>
+  <ul id="studentList"></ul>
+
+  <script>
+    const apiUrl = "http://localhost:3000/students";
+
+    function fetchStudents() {
+      fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById("studentList");
+          list.innerHTML = "";
+          data.forEach(student => {
+            list.innerHTML += `
+              <li>
+                ${student.name} (${student.age}) - ${student.course}
+                <button onclick="deleteStudent(${student.id})">Delete</button>
+              </li>`;
+          });
+        });
+    }
+
+    function addStudent() {
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+      const course = document.getElementById("course").value;
+
+      fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, age, course })
+      })
+      .then(() => {
+        fetchStudents();
+      });
+    }
+
+    function deleteStudent(id) {
+      fetch(`${apiUrl}/${id}`, { method: "DELETE" })
+        .then(() => fetchStudents());
+    }
+
+    fetchStudents();
+  </script>
+
+</body>
+</html>
